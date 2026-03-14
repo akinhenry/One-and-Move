@@ -1,0 +1,29 @@
+{
+  "name": "@One-and-Move/api",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@One-and-Move/auth": "workspace:*",
+    "@One-and-Move/db": "workspace:*",
+    "@One-and-Move/env": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "dotenv": "catalog:",
+    "next": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@One-and-Move/config": "workspace:*",
+    "typescript": "^5"
+  }
+}

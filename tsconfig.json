@@ -1,0 +1,6 @@
+{
+  "extends": "@One-and-Move/config/tsconfig.base.json",
+  "compilerOptions": {
+    "strictNullChecks": true
+  }
+}
