@@ -6,6 +6,33 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 
+const createSocialProviderConfig = <T extends Record<string, unknown>>(
+  clientId: string | undefined,
+  clientSecret: string | undefined,
+  options?: T,
+) => {
+  if (!clientId || !clientSecret) {
+    return null;
+  }
+
+  return {
+    clientId,
+    clientSecret,
+    ...(options ?? {}),
+  };
+};
+
+const googleProvider = createSocialProviderConfig(env.GOOGLE_CLIENT_ID, env.GOOGLE_CLIENT_SECRET, {
+  prompt: "select_account" as const,
+});
+
+const appleProvider = createSocialProviderConfig(env.APPLE_CLIENT_ID, env.APPLE_CLIENT_SECRET);
+
+const facebookProvider = createSocialProviderConfig(
+  env.FACEBOOK_CLIENT_ID,
+  env.FACEBOOK_CLIENT_SECRET,
+);
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -23,30 +50,9 @@ export const auth = betterAuth({
     enabled: true,
   },
   socialProviders: {
-    ...(env.GOOGLE_CLIENT_ID
-      ? {
-        google: {
-          clientId: env.GOOGLE_CLIENT_ID,
-          clientSecret: env.GOOGLE_CLIENT_SECRET!,
-        },
-      }
-      : {}),
-    ...(env.APPLE_CLIENT_ID
-      ? {
-        apple: {
-          clientId: env.APPLE_CLIENT_ID,
-          clientSecret: env.APPLE_CLIENT_SECRET!,
-        },
-      }
-      : {}),
-    ...(env.FACEBOOK_CLIENT_ID
-      ? {
-        facebook: {
-          clientId: env.FACEBOOK_CLIENT_ID,
-          clientSecret: env.FACEBOOK_CLIENT_SECRET!,
-        },
-      }
-      : {}),
+    ...(googleProvider ? { google: googleProvider } : {}),
+    ...(appleProvider ? { apple: appleProvider } : {}),
+    ...(facebookProvider ? { facebook: facebookProvider } : {}),
   },
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,

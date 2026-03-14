@@ -14,6 +14,17 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
   const router = useRouter();
   const { isPending } = authClient.useSession();
 
+  const handleGoogleSignIn = async () => {
+    const { error } = await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+
+    if (error) {
+      toast.error(error.message || error.statusText || "Google sign in failed");
+    }
+  };
+
   const form = useForm({
     defaultValues: {
       email: "",
@@ -51,6 +62,19 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
   return (
     <div className="mx-auto w-full mt-10 max-w-md p-6">
       <h1 className="mb-6 text-center text-3xl font-bold">Welcome Back</h1>
+
+      <Button type="button" variant="outline" className="w-full" onClick={handleGoogleSignIn}>
+        Continue with Google
+      </Button>
+
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+        </div>
+      </div>
 
       <form
         onSubmit={(e) => {

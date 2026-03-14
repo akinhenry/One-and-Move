@@ -51,6 +51,28 @@ function SignIn() {
   const { colorScheme } = useColorScheme();
   const theme = colorScheme === "dark" ? NAV_THEME.dark : NAV_THEME.light;
   const [error, setError] = useState<string | null>(null);
+  const [isGoogleSigningIn, setIsGoogleSigningIn] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setError(null);
+      setIsGoogleSigningIn(true);
+
+      const { error } = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+
+      if (error) {
+        setError(getErrorMessage(error) ?? "Failed to sign in with Google");
+        return;
+      }
+
+      queryClient.refetchQueries();
+    } finally {
+      setIsGoogleSigningIn(false);
+    }
+  };
 
   const form = useForm({
     defaultValues: {
@@ -159,12 +181,12 @@ function SignIn() {
 
               <TouchableOpacity
                 onPress={form.handleSubmit}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isGoogleSigningIn}
                 style={[
                   styles.button,
                   {
                     backgroundColor: theme.primary,
-                    opacity: isSubmitting ? 0.5 : 1,
+                    opacity: isSubmitting || isGoogleSigningIn ? 0.5 : 1,
                   },
                 ]}
               >
@@ -172,6 +194,27 @@ function SignIn() {
                   <ActivityIndicator size="small" color="#ffffff" />
                 ) : (
                   <Text style={styles.buttonText}>Sign In</Text>
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleGoogleSignIn}
+                disabled={isSubmitting || isGoogleSigningIn}
+                style={[
+                  styles.secondaryButton,
+                  {
+                    borderColor: theme.border,
+                    backgroundColor: theme.background,
+                    opacity: isSubmitting || isGoogleSigningIn ? 0.5 : 1,
+                  },
+                ]}
+              >
+                {isGoogleSigningIn ? (
+                  <ActivityIndicator size="small" color={theme.text} />
+                ) : (
+                  <Text style={[styles.secondaryButtonText, { color: theme.text }]}>
+                    Continue with Google
+                  </Text>
                 )}
               </TouchableOpacity>
             </>
@@ -214,6 +257,17 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontSize: 16,
+  },
+  secondaryButton: {
+    borderWidth: 1,
+    marginTop: 12,
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  secondaryButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 
