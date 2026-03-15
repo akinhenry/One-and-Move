@@ -34,6 +34,7 @@ export default function SignUpForm({
 			email: "",
 			password: "",
 			name: "",
+			preferredTransportMode: "Robot Taxi",
 		},
 		onSubmit: async ({ value }) => {
 			await authClient.signUp.email(
@@ -41,6 +42,8 @@ export default function SignUpForm({
 					email: value.email,
 					password: value.password,
 					name: value.name,
+					// @ts-expect-error
+					preferredTransportMode: value.preferredTransportMode,
 				},
 				{
 					onSuccess: () => {
@@ -58,6 +61,7 @@ export default function SignUpForm({
 				name: z.string().min(2, "Name must be at least 2 characters"),
 				email: z.email("Invalid email address"),
 				password: z.string().min(8, "Password must be at least 8 characters"),
+				preferredTransportMode: z.enum(["Robot Taxi", "JUTC Bus"]),
 			}),
 		},
 	});
@@ -183,6 +187,49 @@ export default function SignUpForm({
 								/>
 								{field.state.meta.errors.map((error) => (
 									<p className="text-red-500" key={error?.message}>
+										{error?.message}
+									</p>
+								))}
+							</div>
+						)}
+					</form.Field>
+				</div>
+
+				<div>
+					<form.Field name="preferredTransportMode">
+						{(field) => (
+							<div className="space-y-2">
+								<Label htmlFor={field.name}>Preferred mode of transport</Label>
+								<div className="relative">
+									<select
+										className="w-full appearance-none rounded-md border-2 border-slate-300 bg-white px-3 py-2 text-sm focus-visible:border-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+										id={field.name}
+										name={field.name}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value as any)}
+										value={field.state.value}
+									>
+										<option value="Robot Taxi">Robot Taxi</option>
+										<option value="JUTC Bus">JUTC Bus</option>
+									</select>
+									<div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+										<svg
+											className="h-4 w-4 text-slate-500"
+											fill="none"
+											stroke="currentColor"
+											strokeWidth="2"
+											viewBox="0 0 24 24"
+										>
+											<path
+												d="M19 9l-7 7-7-7"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											/>
+										</svg>
+									</div>
+								</div>
+								{field.state.meta.errors.map((error) => (
+									<p className="text-red-500 text-sm" key={error?.message}>
 										{error?.message}
 									</p>
 								))}
