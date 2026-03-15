@@ -1,6 +1,5 @@
 {
-  "buildCommand": "cd ../.. && bun x turbo build --filter=@One-and-Move/web",
-  "outputDirectory": "apps/web/.next",
+  "buildCommand": "cd apps/web && bun x turbo build --filter=@One-and-Move/web",
   "installCommand": "bun install",
   "framework": "nextjs"
 }
