@@ -1,7 +1,1 @@
-{
-  "framework": "nextjs",
-  "rootDirectory": "apps/web",
-  "installCommand": "cd ../.. && bun install",
-  "buildCommand": "bun x next build",
-  "outputDirectory": ".next"
-}
+{}
