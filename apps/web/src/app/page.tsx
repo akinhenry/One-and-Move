@@ -15,7 +15,7 @@ export default function Home() {
 			<main className="mx-auto max-w-7xl items-center px-8 pt-16 lg:grid lg:grid-cols-2 lg:gap-16">
 				<div>
 					<h1 className="mb-6 font-bold text-5xl text-blue-900 leading-tight tracking-tight md:text-6xl">
-						Know the true
+						Know the true<br/>
             arrival time.
 					</h1>
 					<p className="mb-10 max-w-lg text-blue-800/80 text-lg leading-relaxed">
@@ -44,26 +44,26 @@ export default function Home() {
 					<div className="grid max-w-lg grid-cols-3 gap-8 border-blue-600/30 border-t pt-8 dark:border-blue-500/20">
 						<div>
 							<div className="mb-1 text-blue-800/80 text-sm dark:text-slate-400">
-								Route Accuracy
+								JUTC Routes
 							</div>
 							<div className="font-bold text-3xl text-blue-900 dark:text-slate-100">
-								95%
+								300+
 							</div>
 						</div>
 						<div>
 							<div className="mb-1 text-blue-800/80 text-sm dark:text-slate-400">
-								Active Vehicles
+								Avg Fare Saved
 							</div>
 							<div className="font-bold text-3xl text-blue-900 dark:text-slate-100">
-								120+
+								$350
 							</div>
 						</div>
 						<div>
 							<div className="mb-1 text-blue-800/80 text-sm dark:text-slate-400">
-								Avg Refresh
+								Parishes Covered
 							</div>
 							<div className="font-bold text-3xl text-blue-900 dark:text-slate-100">
-								1.5s
+								14
 							</div>
 						</div>
 					</div>
@@ -108,75 +108,181 @@ export default function Home() {
 
 			{/* Features Section */}
 			<section className="mx-auto max-w-7xl px-8 pt-32" id="features">
-				<h2 className="mb-4 font-bold text-4xl text-blue-900 dark:text-slate-100">
-					Features
-				</h2>
-				<p className="mb-12 max-w-3xl border-blue-200 border-b pb-12 font-medium text-blue-800/90 text-xl dark:border-slate-800 dark:text-blue-200">
-					Everything you need to bring an intelligent transit map into your
-					hands — without guesswork.
-				</p>
+				<div className="mb-12 text-center">
+					<p className="mb-3 font-semibold text-blue-500 text-sm uppercase tracking-widest dark:text-blue-400">
+						Features
+					</p>
+					<h2 className="font-black text-4xl text-blue-900 tracking-tight md:text-5xl dark:text-slate-100">
+						Everything you need to get around
+					</h2>
+				</div>
 
-				<div className="grid gap-12 md:grid-cols-3">
-					<div>
-						<div className="mb-4 text-blue-600 dark:text-blue-400">
-							<MapIcon className="opacity-90" size={26} />
+				<div className="grid gap-6 md:grid-cols-3">
+					<div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+							<MapIcon size={22} />
 						</div>
 						<h3 className="mb-2 font-bold text-blue-900 text-xl dark:text-slate-100">
 							Live Map Tracking
 						</h3>
-						<p className="font-medium text-base text-blue-800/80 leading-relaxed dark:text-slate-300">
+						<p className="text-blue-800/70 text-base leading-relaxed dark:text-slate-400">
 							Watch JUTC buses and robot taxis move on a live map, checking
 							their availability and proximity in real-time.
 						</p>
 					</div>
-					<div>
-						<div className="mb-4 text-blue-600 dark:text-blue-400">
-							<Clock className="opacity-90" size={26} />
+					<div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+							<Clock size={22} />
 						</div>
 						<h3 className="mb-2 font-bold text-blue-900 text-xl dark:text-slate-100">
 							Wait Time Estimates
 						</h3>
-						<p className="font-medium text-base text-blue-800/80 leading-relaxed dark:text-slate-300">
+						<p className="text-blue-800/70 text-base leading-relaxed dark:text-slate-400">
 							Eliminate uncertainty with arrival predictions based on actual
 							road conditions, speeds, and live geolocation.
 						</p>
 					</div>
-					<div>
-						<div className="mb-4 text-blue-600 dark:text-blue-400">
-							<Car className="opacity-90" size={26} />
+					<div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+							<Car size={22} />
 						</div>
 						<h3 className="mb-2 font-bold text-blue-900 text-xl dark:text-slate-100">
-							Vehicle Specifics
+							Crowdsourced Tracking
 						</h3>
-						<p className="font-medium text-base text-blue-800/80 leading-relaxed dark:text-slate-300">
-							Filter tracking based on your needs—know instantly if your next
-							ride is a public bus or an autonomous taxi.
+						<p className="text-blue-800/70 text-base leading-relaxed dark:text-slate-400">
+							Riders on board report their vehicle in real time, keeping the
+							map accurate even where GPS coverage is sparse.
 						</p>
 					</div>
 				</div>
 			</section>
 
-			{/* Footer / Explanation Section */}
-			<section className="mx-auto max-w-7xl px-8 pt-32" id="how-it-works">
-				<div className="rounded-3xl border border-blue-200 bg-blue-50/50 p-8 text-blue-900 shadow-xl transition-colors duration-500 md:p-12 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100">
-					<h2 className="mb-6 font-black text-3xl text-blue-900 uppercase tracking-tight md:text-5xl dark:text-slate-100">
-						HOW One and move helps you find taxies and jutc
+			{/* How it works Section */}
+			<section className="mx-auto max-w-7xl px-8 pt-32 pb-24" id="how-it-works">
+				<div className="mb-12 text-center">
+					<p className="mb-3 font-semibold text-blue-500 text-sm uppercase tracking-widest dark:text-blue-400">
+						How it works
+					</p>
+					<h2 className="font-black text-4xl text-blue-900 tracking-tight md:text-5xl dark:text-slate-100">
+						Three steps to finding your ride
 					</h2>
-					<div className="max-w-4xl space-y-4 border-blue-600 border-l-4 pl-6 dark:border-blue-500">
-						<p className="font-semibold text-blue-800/90 text-lg leading-relaxed md:text-xl dark:text-blue-200">
-							One & Move connects directly with JUTC transit networks and robot
-							taxi locators to continuously map vehicle fleets onto an
-							interactive view.
+				</div>
+
+				<div className="grid gap-6 md:grid-cols-3">
+					<div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500 text-white font-bold text-lg">
+							1
+						</div>
+						<h3 className="mb-2 font-bold text-blue-900 text-xl dark:text-slate-100">
+							Open the map
+						</h3>
+						<p className="text-blue-800/70 text-base leading-relaxed dark:text-slate-400">
+							See JUTC buses and robot taxis moving in real time across Kingston and beyond, updated continuously by crowdsourced riders.
 						</p>
-						<p className="font-semibold text-blue-800/90 text-lg leading-relaxed md:text-xl dark:text-blue-200">
-							With our system, you aren't guessing when your ride will show up.
-							You simply open the app, look at your targeted route, and track
-							exactly how far away your bus or taxi is. We provide the control
-							and transparency you need to master your daily commute.
+					</div>
+
+					<div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500 text-white font-bold text-lg">
+							2
+						</div>
+						<h3 className="mb-2 font-bold text-blue-900 text-xl dark:text-slate-100">
+							Plan your trip
+						</h3>
+						<p className="text-blue-800/70 text-base leading-relaxed dark:text-slate-400">
+							Enter your destination and get a multi-leg route combining JUTC buses and robot taxis — with fare estimates and travel time.
+						</p>
+					</div>
+
+					<div className="rounded-2xl border border-blue-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+						<div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500 text-white font-bold text-lg">
+							3
+						</div>
+						<h3 className="mb-2 font-bold text-blue-900 text-xl dark:text-slate-100">
+							Board and contribute
+						</h3>
+						<p className="text-blue-800/70 text-base leading-relaxed dark:text-slate-400">
+							When you board, tap "I'm on this vehicle" to share your live location — helping every other commuter behind you.
 						</p>
 					</div>
 				</div>
 			</section>
+
+			{/* Footer */}
+			<footer className="mx-auto mt-32 max-w-7xl border-blue-100 border-t px-8 py-16 dark:border-slate-800">
+				<div className="grid gap-12 md:grid-cols-3">
+					{/* Brand */}
+					<div>
+						<p className="mb-2 font-black text-blue-900 text-xl tracking-tight dark:text-slate-100">
+							One &amp; Move
+						</p>
+						<p className="text-blue-800/60 text-sm leading-relaxed dark:text-slate-500">
+							Real-time transit tracking for Jamaica — combining JUTC buses and
+							robot taxis into one map.
+						</p>
+					</div>
+
+					{/* Navigation */}
+					<div>
+						<p className="mb-4 font-semibold text-blue-900 text-sm uppercase tracking-widest dark:text-slate-300">
+							Navigate
+						</p>
+						<ul className="space-y-2 text-blue-800/70 text-sm dark:text-slate-400">
+							<li>
+								<Link className="transition-colors hover:text-blue-600 dark:hover:text-blue-400" href="/">
+									Home
+								</Link>
+							</li>
+							<li>
+								<Link className="transition-colors hover:text-blue-600 dark:hover:text-blue-400" href="/map">
+									Live Map
+								</Link>
+							</li>
+							<li>
+								<Link className="transition-colors hover:text-blue-600 dark:hover:text-blue-400" href="#features">
+									Features
+								</Link>
+							</li>
+							<li>
+								<Link className="transition-colors hover:text-blue-600 dark:hover:text-blue-400" href="#how-it-works">
+									How it works
+								</Link>
+							</li>
+						</ul>
+					</div>
+
+					{/* Contact */}
+					<div>
+						<p className="mb-4 font-semibold text-blue-900 text-sm uppercase tracking-widest dark:text-slate-300">
+							Contact
+						</p>
+						<ul className="space-y-2 text-blue-800/70 text-sm dark:text-slate-400">
+							<li>
+								<a
+									className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+									href="mailto:hello@oneandmove.com"
+								>
+									hello@oneandmove.com
+								</a>
+							</li>
+							<li>Kingston, Jamaica</li>
+							<li>
+								<a
+									className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+									href="https://github.com/akinhenry/One-and-Move"
+									rel="noopener noreferrer"
+									target="_blank"
+								>
+									GitHub
+								</a>
+							</li>
+						</ul>
+					</div>
+				</div>
+
+				<div className="mt-12 border-blue-100 border-t pt-8 text-blue-800/40 text-xs dark:border-slate-800 dark:text-slate-600">
+					© {new Date().getFullYear()} One &amp; Move. All rights reserved.
+				</div>
+			</footer>
 		</div>
 	);
 }
