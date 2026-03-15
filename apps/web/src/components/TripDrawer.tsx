@@ -246,7 +246,7 @@ function RouteResultsPanel({
 									<div
 										className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm"
 										style={{
-											backgroundColor: isBus ? "#10b981" : "#8b5cf6",
+											backgroundColor: isBus ? "#10b981" : "#6b7280",
 										}}
 									>
 										{isBus ? (
@@ -641,7 +641,7 @@ export default function TripDrawer({
 					style={{ zIndex: 1002 }}
 					type="button"
 				>
-					<div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-500">
+					<div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-500">
 						<Navigation color="white" size={13} />
 					</div>
 					Plan a Trip
@@ -723,7 +723,7 @@ export default function TripDrawer({
 										/>
 									</div>
 									<Button
-										className="h-10 w-full rounded-xl bg-violet-500 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition-all hover:bg-violet-600 hover:shadow-lg disabled:opacity-50 disabled:shadow-none"
+										className="h-10 w-full rounded-xl bg-blue-500 text-sm font-semibold text-white shadow-md shadow-blue-500/25 transition-all hover:bg-blue-600 hover:shadow-lg disabled:opacity-50 disabled:shadow-none"
 										disabled={isRouteDisabled}
 										onClick={(e) => {
 											e.stopPropagation();
@@ -741,7 +741,7 @@ export default function TripDrawer({
 									{/* ── Expanded search view ──── */}
 									<div className="flex items-center justify-between px-4 pt-2 pb-3">
 										<div className="flex items-center gap-2.5">
-											<div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500">
+											<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500">
 												<Route color="white" size={15} />
 											</div>
 											<div>
@@ -783,7 +783,7 @@ export default function TripDrawer({
 												/>
 												<input
 													autoComplete="off"
-													className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 pr-3 pl-8 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-violet-500 dark:focus:bg-neutral-800 dark:focus:ring-violet-900/30"
+													className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 pr-3 pl-8 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-blue-500 dark:focus:bg-neutral-800 dark:focus:ring-blue-900/30"
 													id="drawer-from"
 													onChange={(e) => {
 														setFromQuery(e.target.value);
@@ -830,7 +830,7 @@ export default function TripDrawer({
 												/>
 												<input
 													autoComplete="off"
-													className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 pr-3 pl-8 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-violet-500 dark:focus:bg-neutral-800 dark:focus:ring-violet-900/30"
+													className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 pr-3 pl-8 text-sm text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-blue-500 dark:focus:bg-neutral-800 dark:focus:ring-blue-900/30"
 													id="drawer-to"
 													onChange={(e) => {
 														setToQuery(e.target.value);
@@ -853,7 +853,7 @@ export default function TripDrawer({
 										</div>
 
 										<Button
-											className="mt-2 h-11 w-full rounded-xl bg-violet-500 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition-all hover:bg-violet-600 hover:shadow-lg disabled:opacity-50 disabled:shadow-none"
+											className="mt-2 h-11 w-full rounded-xl bg-blue-500 text-sm font-semibold text-white shadow-md shadow-blue-500/25 transition-all hover:bg-blue-600 hover:shadow-lg disabled:opacity-50 disabled:shadow-none"
 											disabled={isRouteDisabled}
 											onClick={handleFindRoute}
 											type="button"
@@ -960,7 +960,7 @@ export default function TripDrawer({
 										<button
 											className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
 												boardingType === "taxi"
-													? "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-700 dark:bg-violet-900/30 dark:text-violet-400"
+													? "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
 													: "border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700"
 											}`}
 											onClick={() => setBoardingType("taxi")}
@@ -983,7 +983,7 @@ export default function TripDrawer({
 									<input
 										autoCapitalize="characters"
 										autoComplete="off"
-										className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm font-mono uppercase text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-violet-500 dark:focus:bg-neutral-800 dark:focus:ring-violet-900/30"
+										className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm font-mono uppercase text-gray-800 outline-none transition-colors placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:focus:border-blue-500 dark:focus:bg-neutral-800 dark:focus:ring-blue-900/30"
 										id="license-plate"
 										maxLength={20}
 										onChange={(e) => setLicensePlate(e.target.value)}
@@ -1003,7 +1003,7 @@ export default function TripDrawer({
 											Bus Route Number
 										</label>
 										<select
-											className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 outline-none transition-colors focus:border-violet-400 focus:bg-white focus:ring-2 focus:ring-violet-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:focus:border-violet-500 dark:focus:bg-neutral-800 dark:focus:ring-violet-900/30"
+											className="h-10 w-full rounded-xl border border-gray-200 bg-gray-50 px-3 text-sm text-gray-800 outline-none transition-colors focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:focus:border-blue-500 dark:focus:bg-neutral-800 dark:focus:ring-blue-900/30"
 											id="route-number"
 											onChange={(e) => setRouteNumber(e.target.value)}
 											value={routeNumber}
@@ -1019,8 +1019,8 @@ export default function TripDrawer({
 								)}
 
 								{/* Info callout */}
-								<div className="rounded-xl border border-violet-100 bg-violet-50 p-3 dark:border-violet-800 dark:bg-violet-900/20">
-									<p className="text-xs leading-relaxed text-violet-700 dark:text-violet-400">
+								<div className="rounded-xl border border-blue-100 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-900/20">
+									<p className="text-xs leading-relaxed text-blue-700 dark:text-blue-400">
 										<Radio className="mr-1 inline -translate-y-px" size={12} />
 										Your location will be shared anonymously while you ride,
 										helping other commuters see live vehicle positions.

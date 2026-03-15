@@ -157,16 +157,29 @@ function interpolateAlongPath(
  * real road geometry. Returns a dense polyline that follows streets.
  *
  * Falls back to straight-line waypoints if the fetch fails (offline, etc.).
+ * Retries once on a 429 (rate-limit) after a short delay.
  */
-async function fetchRoadGeometry(coords: LatLng[]): Promise<LatLng[]> {
+async function fetchRoadGeometry(
+  coords: LatLng[],
+  attempt = 0
+): Promise<LatLng[]> {
   if (coords.length < 2) return coords;
 
-  // OSRM expects lng,lat semicolon-separated
-  const coordStr = coords.map((c) => `${c.lng},${c.lat}`).join(";");
+  // OSRM expects lng,lat semicolon-separated.
+  // Cap at 25 waypoints to stay within the demo server's URL length limit.
+  const sampled = coords.length > 25 ? sampleEvenly(coords, 25) : coords;
+  const coordStr = sampled.map((c) => `${c.lng},${c.lat}`).join(";");
   const url = `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`;
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+
+    // Rate-limited — back off and retry once
+    if (res.status === 429 && attempt === 0) {
+      await sleep(2000 + Math.random() * 1000);
+      return fetchRoadGeometry(coords, 1);
+    }
+
     if (!res.ok) return coords;
     const json = await res.json();
     const geometry = json?.routes?.[0]?.geometry?.coordinates;
@@ -177,6 +190,24 @@ async function fetchRoadGeometry(coords: LatLng[]): Promise<LatLng[]> {
   } catch {
     return coords;
   }
+}
+
+/** Sleep for `ms` milliseconds */
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/**
+ * Sample `n` evenly-spaced elements from an array, always keeping
+ * the first and last elements so the route endpoints are preserved.
+ */
+function sampleEvenly<T>(arr: T[], n: number): T[] {
+  if (arr.length <= n) return arr;
+  const result: T[] = [arr[0]];
+  const step = (arr.length - 1) / (n - 1);
+  for (let i = 1; i < n - 1; i++) {
+    result.push(arr[Math.round(i * step)]);
+  }
+  result.push(arr[arr.length - 1]);
+  return result;
 }
 
 /**
@@ -211,29 +242,86 @@ function buildTaxiRoutePath(
 }
 
 /**
- * Upgrade all vehicle waypoints from straight lines to road-snapped
- * polylines using OSRM. Call once after createSimulatedVehicles().
- * Mutates the vehicles in-place and returns them.
+ * Build a key for a waypoint sequence so we can de-duplicate routes.
+ */
+function waypointKey(wps: LatLng[]): string {
+  return wps.map((p) => `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`).join("|");
+}
+
+/**
+ * Resolve road-snapped polylines for all unique vehicle routes using OSRM.
+ * Returns a Map<waypointKey, snappedWaypoints> without mutating any vehicle.
+ *
+ * The caller is responsible for applying resolved paths to vehicles, which
+ * avoids the race condition where tickVehicles() replaces vehicle objects
+ * while road-snapping is in flight.
+ *
+ * Runs at most `concurrency` OSRM requests in parallel to avoid
+ * overwhelming the public demo server and triggering rate-limits.
  */
 export async function resolveRoadPaths(
-  vehicles: SimulatedVehicle[]
-): Promise<SimulatedVehicle[]> {
-  const results = await Promise.allSettled(
-    vehicles.map(async (v) => {
-      const snapped = await fetchRoadGeometry(v.waypoints);
-      v.waypoints = snapped;
-      // Re-interpolate current position on the new path
-      const { position, heading: hdg } = interpolateAlongPath(
-        snapped,
-        v.progress
-      );
-      v.lat = position.lat;
-      v.lng = position.lng;
-      v.heading = hdg;
-    })
+  vehicles: SimulatedVehicle[],
+  concurrency = 3
+): Promise<Map<string, LatLng[]>> {
+  // De-duplicate routes: many vehicles share the same waypoints
+  const uniqueKeys = new Map<string, LatLng[]>();
+  for (const v of vehicles) {
+    const k = waypointKey(v.waypoints);
+    if (!uniqueKeys.has(k)) uniqueKeys.set(k, v.waypoints);
+  }
+
+  const resolvedPaths = new Map<string, LatLng[]>();
+
+  // Process unique routes in batches of `concurrency`
+  const entries = [...uniqueKeys.entries()];
+  for (let i = 0; i < entries.length; i += concurrency) {
+    const batch = entries.slice(i, i + concurrency);
+    const results = await Promise.allSettled(
+      batch.map(async ([key, wps]) => {
+        const snapped = await fetchRoadGeometry(wps);
+        // Only store if OSRM actually returned different (snapped) geometry
+        if (snapped !== wps && snapped.length >= 2) {
+          resolvedPaths.set(key, snapped);
+        }
+      })
+    );
+    for (const r of results) {
+      if (r.status === "rejected") {
+        console.warn("[simulation] road-snap failed for a batch entry:", r.reason);
+      }
+    }
+    // Small pause between batches to be polite to the public server
+    if (i + concurrency < entries.length) {
+      await sleep(400);
+    }
+  }
+
+  console.info(
+    `[simulation] road-snap complete: ${resolvedPaths.size}/${uniqueKeys.size} routes snapped`
   );
-  // Silently ignore per-vehicle failures; they keep straight-line paths
-  return vehicles;
+  return resolvedPaths;
+}
+
+/**
+ * Apply resolved road-snapped waypoints to a set of vehicles.
+ * This can safely be called on whatever the current vehicle array is,
+ * even if tickVehicles() has replaced objects since resolveRoadPaths() ran.
+ * Mutates vehicles in-place.
+ */
+export function applyResolvedPaths(
+  vehicles: SimulatedVehicle[],
+  resolvedPaths: Map<string, LatLng[]>
+): void {
+  for (const v of vehicles) {
+    const k = waypointKey(v.waypoints);
+    const snapped = resolvedPaths.get(k);
+    if (!snapped) continue;
+    v.waypoints = snapped;
+    const { position, heading: hdg } = interpolateAlongPath(snapped, v.progress);
+    v.lat = position.lat;
+    v.lng = position.lng;
+    v.heading = hdg;
+  }
 }
 
 /* ─── Pre-defined simulation routes ─────────────── */
@@ -251,31 +339,41 @@ const POPULAR_BUS_ROUTES = [
 ] as const;
 
 /**
- * Pre-defined taxi routes using known taxi stands.
- * Each entry picks a from-stand and to-stand by name.
+ * Pre-defined taxi routes using exact taxi stand names from taxi-stands.ts.
+ * Multiple taxis per route give the map a lively feel.
  */
-const POPULAR_TAXI_ROUTES = [
-  {
-    fromStandName: "Half Way Tree",
-    toStandName: "Papine",
-    label: "HWT → Papine",
-  },
-  {
-    fromStandName: "Cross Roads",
-    toStandName: "Downtown Kingston",
-    label: "Cross Roads → Downtown",
-  },
-  {
-    fromStandName: "Liguanea",
-    toStandName: "Half Way Tree",
-    label: "Liguanea → HWT",
-  },
-  {
-    fromStandName: "Constant Spring",
-    toStandName: "Cross Roads",
-    label: "Constant Spring → Cross Roads",
-  },
-] as const;
+const POPULAR_TAXI_ROUTES: Array<{
+  fromStandId: string;
+  toStandId: string;
+  label: string;
+  count: number; // how many taxis on this route
+  fare: string;
+}> = [
+    // ── Kingston metropolitan ──────────────────────────
+    { fromStandId: "half-way-tree", toStandId: "papine", label: "HWT → Papine", count: 3, fare: "JMD $200" },
+    { fromStandId: "cross-roads", toStandId: "downtown-kingston", label: "Cross Roads → Downtown", count: 3, fare: "JMD $200" },
+    { fromStandId: "liguanea", toStandId: "half-way-tree", label: "Liguanea → HWT", count: 2, fare: "JMD $200" },
+    { fromStandId: "constant-spring", toStandId: "cross-roads", label: "Constant Spring → Cross Roads", count: 2, fare: "JMD $220" },
+    { fromStandId: "barbican", toStandId: "papine", label: "Barbican → Papine", count: 2, fare: "JMD $200" },
+    { fromStandId: "downtown-kingston", toStandId: "half-way-tree", label: "Downtown → HWT", count: 2, fare: "JMD $200" },
+    // ── Portmore ──────────────────────────────────────
+    { fromStandId: "portmore", toStandId: "half-way-tree", label: "Portmore → HWT", count: 3, fare: "JMD $350" },
+    { fromStandId: "greater-portmore", toStandId: "downtown-kingston", label: "Greater Portmore → Downtown", count: 2, fare: "JMD $400" },
+    { fromStandId: "naggo-head", toStandId: "spanish-town", label: "Naggo Head → Spanish Town", count: 2, fare: "JMD $300" },
+    { fromStandId: "waterford", toStandId: "portmore", label: "Waterford → Portmore", count: 2, fare: "JMD $200" },
+    // ── Spanish Town / Clarendon ──────────────────────
+    { fromStandId: "spanish-town", toStandId: "half-way-tree", label: "Spanish Town → HWT", count: 2, fare: "JMD $400" },
+    { fromStandId: "old-harbour", toStandId: "spanish-town", label: "Old Harbour → Spanish Town", count: 2, fare: "JMD $350" },
+    // ── North coast ───────────────────────────────────
+    { fromStandId: "ochorios", toStandId: "moneague", label: "Ocho Rios → Moneague", count: 2, fare: "JMD $350" },
+    { fromStandId: "ochorios", toStandId: "stanns-bay", label: "Ocho Rios → St Ann's Bay", count: 2, fare: "JMD $250" },
+    { fromStandId: "runaway-bay", toStandId: "ochorios", label: "Runaway Bay → Ocho Rios", count: 2, fare: "JMD $300" },
+    { fromStandId: "port-maria", toStandId: "annotto-bay", label: "Port Maria → Annotto Bay", count: 2, fare: "JMD $250" },
+    // ── Montego Bay area ──────────────────────────────
+    { fromStandId: "montego-bay", toStandId: "falmouth", label: "Montego Bay → Falmouth", count: 2, fare: "JMD $400" },
+    { fromStandId: "montego-bay", toStandId: "anchovy", label: "Montego Bay → Anchovy", count: 2, fare: "JMD $250" },
+    { fromStandId: "cambridge", toStandId: "montego-bay", label: "Cambridge → Montego Bay", count: 2, fare: "JMD $550" },
+  ];
 
 /* ─── Simulation state factory ──────────────────── */
 
@@ -325,34 +423,40 @@ export function createSimulatedVehicles(): SimulatedVehicle[] {
     });
   }
 
-  // Taxis
+  // Taxis — look up stands by id for exact matching
   for (const taxiDef of POPULAR_TAXI_ROUTES) {
-    const fromStand = TAXI_STANDS.find((s) => s.name === taxiDef.fromStandName);
-    const toStand = TAXI_STANDS.find((s) => s.name === taxiDef.toStandName);
+    const fromStand = TAXI_STANDS.find((s) => s.id === taxiDef.fromStandId);
+    const toStand = TAXI_STANDS.find((s) => s.id === taxiDef.toStandId);
     if (!fromStand || !toStand) continue;
 
     const waypoints = buildTaxiRoutePath(fromStand, toStand);
-    const startProgress = Math.random();
-    const { position, heading: hdg } = interpolateAlongPath(
-      waypoints,
-      startProgress
-    );
 
-    vehicles.push({
-      id: `sim-taxi-${idCounter++}`,
-      name: `Route Taxi ${taxiDef.label}`,
-      type: "robot_taxi",
-      route: taxiDef.label,
-      waypoints,
-      lat: position.lat,
-      lng: position.lng,
-      heading: hdg,
-      capacity: 4,
-      avgCost: "JMD $250",
-      progress: startProgress,
-      speedFactor: 0.9 + Math.random() * 0.3,
-      direction: 1,
-    });
+    for (let t = 0; t < taxiDef.count; t++) {
+      // Distribute starting positions evenly so they aren't all bunched up
+      const startProgress = (t / taxiDef.count) + Math.random() * (1 / taxiDef.count);
+      // Alternate direction so we see taxis going both ways
+      const direction: 1 | -1 = t % 2 === 0 ? 1 : -1;
+      const { position, heading: hdg } = interpolateAlongPath(
+        waypoints,
+        direction === 1 ? startProgress : 1 - startProgress
+      );
+
+      vehicles.push({
+        id: `sim-taxi-${idCounter++}`,
+        name: `Route Taxi ${taxiDef.label}`,
+        type: "robot_taxi",
+        route: taxiDef.label,
+        waypoints,
+        lat: position.lat,
+        lng: position.lng,
+        heading: hdg,
+        capacity: 4,
+        avgCost: taxiDef.fare,
+        progress: direction === 1 ? startProgress : 1 - startProgress,
+        speedFactor: 0.9 + Math.random() * 0.3,
+        direction,
+      });
+    }
   }
 
   return vehicles;

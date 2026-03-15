@@ -1,5 +1,6 @@
 import type { SimulatedUser, SimulatedVehicle } from "@/lib/simulation";
 import {
+  applyResolvedPaths,
   createSimulatedUser,
   createSimulatedVehicles,
   DEFAULT_CONFIG,
@@ -7,13 +8,16 @@ import {
   tickUser,
   tickVehicles,
 } from "@/lib/simulation";
+import type { LatLng } from "@/lib/simulation";
 
 /* ─── Singleton simulation state ────────────────── */
 
 let vehicles: SimulatedVehicle[] | null = null;
 let simUser: SimulatedUser | null = null;
 let lastTick = Date.now();
-let roadsResolved = false;
+/** Resolved waypoint lookup — survives vehicle object replacement by tick() */
+let resolvedPaths: Map<string, LatLng[]> | null = null;
+let roadSnapPromise: Promise<void> | null = null;
 
 function ensureInitialised(): void {
   if (vehicles === null) {
@@ -29,18 +33,34 @@ function tick(): void {
   const delta = (now - lastTick) / 1000;
   lastTick = now;
   vehicles = tickVehicles(vehicles, DEFAULT_CONFIG, delta);
+
+  // Re-apply snapped waypoints to the freshly-created vehicle objects.
+  // tickVehicles() returns new objects via .map({...v}), so any previously
+  // applied waypoints are lost. We re-apply from our cached lookup every tick.
+  if (resolvedPaths && resolvedPaths.size > 0) {
+    applyResolvedPaths(vehicles, resolvedPaths);
+  }
+
   simUser = tickUser(simUser, DEFAULT_CONFIG, delta);
 }
 
-/** One-time road-snapping (fire-and-forget) */
-async function resolveOnce(): Promise<void> {
-  if (roadsResolved || !vehicles) return;
-  roadsResolved = true;
-  try {
-    vehicles = await resolveRoadPaths(vehicles);
-  } catch {
-    // fall back to straight lines silently
-  }
+/** One-time road-snapping — starts once, result cached in resolvedPaths */
+function resolveOnce(): void {
+  if (resolvedPaths || roadSnapPromise) return;
+  roadSnapPromise = (async () => {
+    try {
+      if (vehicles) {
+        const paths = await resolveRoadPaths(vehicles);
+        resolvedPaths = paths;
+        // Apply immediately to the current vehicle array
+        if (vehicles && paths.size > 0) {
+          applyResolvedPaths(vehicles, paths);
+        }
+      }
+    } catch (err) {
+      console.warn("[simulation] resolveRoadPaths failed:", err);
+    }
+  })();
 }
 
 /* ─── Wire format (compact) ─────────────────────── */
@@ -104,30 +124,38 @@ export async function GET(): Promise<Response> {
 
   const stream = new ReadableStream({
     start(controller) {
-      // Tick + push every second
-      const id = setInterval(() => {
-        try {
-          tick();
-          const frame = buildFrame();
-          const data = `data: ${JSON.stringify(frame)}\n\n`;
-          controller.enqueue(encoder.encode(data));
-        } catch {
-          clearInterval(id);
-          controller.close();
-        }
-      }, 1000);
+      let closed = false;
+
+      const close = () => {
+        if (closed) return;
+        closed = true;
+        clearInterval(id);
+        try { controller.close(); } catch { /* already closed */ }
+      };
 
       // Send first frame immediately
       tick();
       const first = `data: ${JSON.stringify(buildFrame())}\n\n`;
       controller.enqueue(encoder.encode(first));
 
-      // Clean up when the client disconnects
-      // The stream's cancel() is called automatically when the reader drops
+      // Tick + push every second
+      const id = setInterval(() => {
+        if (closed) { clearInterval(id); return; }
+        try {
+          tick();
+          const frame = buildFrame();
+          const data = `data: ${JSON.stringify(frame)}\n\n`;
+          controller.enqueue(encoder.encode(data));
+        } catch {
+          close();
+        }
+      }, 1000);
+
+      // Expose close fn so cancel() can use it
+      (controller as unknown as { _close: () => void })._close = close;
     },
-    cancel() {
-      // Client disconnected — nothing to clean up since the interval
-      // will error on the next enqueue and clear itself
+    cancel(controller) {
+      (controller as unknown as { _close?: () => void })._close?.();
     },
   });
 

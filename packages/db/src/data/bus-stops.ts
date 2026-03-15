@@ -104,8 +104,8 @@ export const BUS_STOPS: BusStopData[] = [
     id: "liguanea",
     name: "Liguanea",
     address: "Liguanea Plaza, Kingston 6",
-    lat: 18.0155,
-    lng: -76.774,
+    lat: 18.02046475,
+    lng: -76.7693434,
     routeIds: [],
   },
   {

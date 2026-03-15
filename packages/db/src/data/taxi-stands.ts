@@ -12,7 +12,7 @@ export const TAXI_STANDS: TaxiStandData[] = [
   { id: "half-way-tree", name: "Half Way Tree Taxi Stand", lat: 18.012, lng: -76.799 },
   { id: "cross-roads", name: "Cross Roads Taxi Stand", lat: 18.006, lng: -76.783 },
   { id: "papine", name: "Papine Taxi Stand", lat: 18.010, lng: -76.740 },
-  { id: "liguanea", name: "Liguanea Taxi Stand", lat: 18.012, lng: -76.760 },
+  { id: "liguanea", name: "Liguanea Taxi Stand", lat: 18.020479, lng: -76.769465 },
   { id: "barbican", name: "Barbican Taxi Stand", lat: 18.030, lng: -76.763 },
   { id: "constant-spring", name: "Constant Spring Taxi Stand", lat: 18.049, lng: -76.793 },
   { id: "stony-hill", name: "Stony Hill Taxi Stand", lat: 18.072, lng: -76.783 },

@@ -60,7 +60,7 @@ function VehiclePopup({
 	onClose: () => void;
 }) {
 	const isBus = vehicle.type === "jutc";
-	const iconBg = isBus ? "#10b981" : "#8b5cf6";
+	const iconBg = isBus ? "#10b981" : "#6b7280";
 	const IconComponent = isBus ? Bus : Car;
 
 	return (
@@ -220,8 +220,12 @@ function MapLibreInner({
 			const map = mapRef.current;
 			if (!map) return;
 
-			// Check for cluster clicks first
-			const clusterLayers = ["bus-stops-clusters", "taxi-stands-clusters"];
+			// Check for cluster clicks first (stops + vehicles)
+			const clusterLayers = [
+				"bus-stops-clusters",
+				"taxi-stands-clusters",
+				"vehicles-clusters",
+			];
 			const features = map.queryRenderedFeatures(e.point, {
 				layers: clusterLayers,
 			});
@@ -240,6 +244,32 @@ function MapLibreInner({
 						});
 					});
 				}
+				return;
+			}
+
+			// Check for individual vehicle clicks
+			const vehicleFeatures = map.queryRenderedFeatures(e.point, {
+				layers: ["vehicles-point"],
+			});
+			if (vehicleFeatures.length > 0) {
+				const f = vehicleFeatures[0];
+				const [lng, lat] = f.geometry.coordinates;
+				const p = f.properties;
+				setSelectedVehicle((prev) =>
+					prev?.id === p.id
+						? null
+						: {
+								id: p.id,
+								name: p.name,
+								type: p.type,
+								lat,
+								lng,
+								capacity: p.capacity,
+								avgCost: p.avgCost,
+								route: p.route,
+								heading: p.heading,
+							}
+				);
 				return;
 			}
 
@@ -299,14 +329,6 @@ function MapLibreInner({
 		};
 	}, [fromMarker, toMarker, routePoints]);
 
-	const handleVehicleClick = useCallback(
-		(vehicle: Vehicle, e: React.MouseEvent) => {
-			e.stopPropagation();
-			setSelectedVehicle((prev) => (prev?.id === vehicle.id ? null : vehicle));
-		},
-		[]
-	);
-
 	const tileUrl = darkMode ? DARK_TILE_URL : LIGHT_TILE_URL;
 
 	// Memoize mapStyle so MapLibre only reloads the style when darkMode changes,
@@ -340,6 +362,154 @@ function MapLibreInner({
 	// Memoize mapLib import so it isn't re-evaluated on every render
 	const mapLib = useMemo(() => import("maplibre-gl"), []);
 
+	// Build a clustered GeoJSON source for vehicles so they render at a fixed
+	// pixel size regardless of zoom level (MapLibre symbol layer, not DOM markers).
+	const vehiclesGeoJson = useMemo(
+		() => ({
+			type: "FeatureCollection" as const,
+			features: vehicles.map((v) => ({
+				type: "Feature" as const,
+				geometry: {
+					type: "Point" as const,
+					coordinates: [v.lng, v.lat],
+				},
+				properties: {
+					id: v.id,
+					name: v.name,
+					type: v.type,
+					heading: v.heading ?? 0,
+					capacity: v.capacity,
+					avgCost: v.avgCost,
+					route: v.route ?? "",
+					iconImage: v.type === "jutc" ? "bus-icon" : "taxi-icon",
+				},
+			})),
+		}),
+		[vehicles]
+	);
+
+	// Register SVG sprites into MapLibre once the map is ready
+	const handleMapLoad = useCallback(
+		// biome-ignore lint/suspicious/noExplicitAny: MapLibre map instance
+		(e: any) => {
+			const map = e.target;
+
+			const addSvgImage = (id: string, svg: string, size = 44) => {
+				if (map.hasImage(id)) return;
+				const img = new Image(size, size);
+				img.onload = () => map.addImage(id, img);
+				img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+			};
+
+			// ── Individual vehicle icons ────────────────────────────────────────
+			addSvgImage(
+				"bus-icon",
+				`<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
+					<rect fill="#1f2937" height="24" rx="5" width="20" x="12" y="12"/>
+					<rect fill="#10b981" height="6" rx="2" width="14" x="15" y="14"/>
+					<rect fill="#9ca3af" height="3" rx="1" width="4" x="14" y="23"/>
+					<rect fill="#9ca3af" height="3" rx="1" width="4" x="20" y="23"/>
+					<rect fill="#9ca3af" height="3" rx="1" width="4" x="26" y="23"/>
+					<circle cx="15" cy="35" fill="#374151" r="2.5"/>
+					<circle cx="29" cy="35" fill="#374151" r="2.5"/>
+				</svg>`
+			);
+
+			// White sedan: clean white body, teal accent stripe, silver trim
+			addSvgImage(
+				"taxi-icon",
+				`<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44">
+					<!-- Shadow -->
+					<ellipse cx="22" cy="37" fill="rgba(0,0,0,0.12)" rx="12" ry="2"/>
+					<!-- Body -->
+					<rect fill="#f0f0f0" height="18" rx="5" width="22" x="11" y="16"/>
+					<!-- Side accent -->
+					<rect fill="#9ca3af" height="2" rx="1" width="22" x="11" y="27"/>
+					<!-- Roof -->
+					<rect fill="#e5e7eb" height="6" rx="3" width="14" x="15" y="12"/>
+					<!-- Windshield -->
+					<rect fill="#bfdbfe" height="5" rx="2" width="14" x="15" y="17"/>
+					<!-- Rear window -->
+					<rect fill="#bfdbfe" height="3" rx="1" width="10" x="17" y="24"/>
+					<!-- Headlights -->
+					<rect fill="#fbbf24" height="2" rx="1" width="2" x="12" y="17"/>
+					<rect fill="#fbbf24" height="2" rx="1" width="2" x="30" y="17"/>
+					<!-- Tail lights -->
+					<rect fill="#ef4444" height="2" rx="1" width="2" x="12" y="30"/>
+					<rect fill="#ef4444" height="2" rx="1" width="2" x="30" y="30"/>
+					<!-- Wheels -->
+					<circle cx="16" cy="35" fill="#1f2937" r="3"/>
+					<circle cx="16" cy="35" fill="#6b7280" r="1.5"/>
+					<circle cx="28" cy="35" fill="#1f2937" r="3"/>
+					<circle cx="28" cy="35" fill="#6b7280" r="1.5"/>
+				</svg>`
+			);
+
+			// ── Cluster badge sprites ────────────────────────────────────────────
+			// Bus cluster: green rounded square with a small bus silhouette
+			addSvgImage(
+				"bus-cluster-icon",
+				`<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52">
+					<circle cx="26" cy="26" fill="#10b981" r="22"/>
+					<circle cx="26" cy="26" fill="none" r="22" stroke="white" stroke-width="2.5"/>
+					<!-- Mini bus -->
+					<rect fill="white" height="13" rx="2.5" width="18" x="17" y="17"/>
+					<rect fill="#10b981" height="4" rx="1" width="13" x="19.5" y="18.5"/>
+					<rect fill="#d1fae5" height="2" rx="0.5" width="3" x="18" y="25"/>
+					<rect fill="#d1fae5" height="2" rx="0.5" width="3" x="22.5" y="25"/>
+					<rect fill="#d1fae5" height="2" rx="0.5" width="3" x="27" y="25"/>
+					<circle cx="20.5" cy="31" fill="#064e3b" r="1.8"/>
+					<circle cx="31.5" cy="31" fill="#064e3b" r="1.8"/>
+				</svg>`,
+				52
+			);
+
+			// Taxi cluster: gray circle with a small white sedan silhouette
+			addSvgImage(
+				"taxi-cluster-icon",
+				`<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52">
+					<circle cx="26" cy="26" fill="#6b7280" r="22"/>
+					<circle cx="26" cy="26" fill="none" r="22" stroke="white" stroke-width="2.5"/>
+					<!-- Mini white sedan body -->
+					<rect fill="#f0f0f0" height="11" rx="2.5" width="18" x="17" y="21"/>
+					<!-- Side accent -->
+					<rect fill="#9ca3af" height="2" rx="0.5" width="18" x="17" y="27"/>
+					<!-- Roof -->
+					<rect fill="#e5e7eb" height="4" rx="2" width="12" x="20" y="17"/>
+					<!-- Windshield -->
+					<rect fill="#bfdbfe" height="3.5" rx="1" width="12" x="20" y="22"/>
+					<!-- Wheels -->
+					<circle cx="20.5" cy="33" fill="#1f2937" r="2"/>
+					<circle cx="31.5" cy="33" fill="#1f2937" r="2"/>
+				</svg>`,
+				52
+			);
+
+			// Vehicle cluster: neutral gray circle with a bus+sedan split silhouette
+			addSvgImage(
+				"vehicle-cluster-icon",
+				`<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52">
+					<circle cx="26" cy="26" fill="#4b5563" r="22"/>
+					<circle cx="26" cy="26" fill="none" r="22" stroke="white" stroke-width="2.5"/>
+					<!-- Left: mini bus -->
+					<rect fill="white" height="11" rx="2" width="11" x="13" y="20"/>
+					<rect fill="#10b981" height="3" rx="1" width="8" x="14.5" y="21.5"/>
+					<circle cx="15.5" cy="32.5" fill="#4b5563" r="1.5"/>
+					<circle cx="22.5" cy="32.5" fill="#4b5563" r="1.5"/>
+					<!-- Right: mini white sedan -->
+					<rect fill="#f0f0f0" height="11" rx="2" width="11" x="28" y="20"/>
+					<rect fill="#9ca3af" height="2" rx="0.5" width="11" x="28" y="26"/>
+					<rect fill="#e5e7eb" height="3" rx="1.5" width="7" x="29.5" y="17.5"/>
+					<rect fill="#bfdbfe" height="3" rx="1" width="7" x="29.5" y="21"/>
+					<circle cx="30" cy="32.5" fill="#1f2937" r="1.5"/>
+					<circle cx="37" cy="32.5" fill="#1f2937" r="1.5"/>
+				</svg>`,
+				52
+			);
+		},
+		[]
+	);
+
 	return (
 		<Map
 			initialViewState={{
@@ -352,10 +522,13 @@ function MapLibreInner({
 				"bus-stops-point",
 				"taxi-stands-clusters",
 				"taxi-stands-point",
+				"vehicles-clusters",
+				"vehicles-point",
 			]}
 			mapLib={mapLib}
 			mapStyle={mapStyle}
 			onClick={handleMapClick}
+			onLoad={handleMapLoad}
 			onMouseEnter={() => {
 				const canvas = mapRef.current?.getCanvas();
 				if (canvas) canvas.style.cursor = "pointer";
@@ -385,7 +558,7 @@ function MapLibreInner({
 					id="route-line"
 					layout={{ "line-cap": "round", "line-join": "round" }}
 					paint={{
-						"line-color": "#8b5cf6",
+						"line-color": "#3b82f6",
 						"line-width": 4,
 						"line-opacity": 0.9,
 					}}
@@ -402,45 +575,33 @@ function MapLibreInner({
 				id="bus-stops"
 				type="geojson"
 			>
-				{/* Cluster circles */}
+				{/* Cluster icon badge with count overlaid */}
 				<Layer
 					filter={["has", "point_count"]}
 					id="bus-stops-clusters"
-					paint={{
-						"circle-color": [
-							"step",
-							["get", "point_count"],
-							"#a7f3d0",
-							5,
-							"#6ee7b7",
-							15,
-							"#10b981",
-						],
-						"circle-radius": [
-							"step",
-							["get", "point_count"],
-							18,
-							5,
-							22,
-							15,
-							28,
-						],
-						"circle-stroke-color": darkMode ? "#1f2937" : "#ffffff",
-						"circle-stroke-width": 2,
-					}}
-					type="circle"
-				/>
-				{/* Cluster count label */}
-				<Layer
-					filter={["has", "point_count"]}
-					id="bus-stops-cluster-count"
 					layout={{
+						"icon-image": "bus-cluster-icon",
+						"icon-size": [
+							"step",
+							["get", "point_count"],
+							0.65,
+							5,
+							0.78,
+							15,
+							0.95,
+						],
+						"icon-allow-overlap": true,
 						"text-field": "{point_count_abbreviated}",
-						"text-size": 12,
+						"text-size": 11,
 						"text-font": ["Open Sans Bold"],
+						"text-offset": [1.15, -1.15],
+						"text-anchor": "center",
+						"text-allow-overlap": true,
 					}}
 					paint={{
-						"text-color": "#064e3b",
+						"text-color": "#ffffff",
+						"text-halo-color": "#064e3b",
+						"text-halo-width": 1.5,
 					}}
 					type="symbol"
 				/>
@@ -487,45 +648,33 @@ function MapLibreInner({
 				id="taxi-stands"
 				type="geojson"
 			>
-				{/* Cluster circles */}
+				{/* Cluster icon badge with count overlaid */}
 				<Layer
 					filter={["has", "point_count"]}
 					id="taxi-stands-clusters"
-					paint={{
-						"circle-color": [
-							"step",
-							["get", "point_count"],
-							"#fde68a",
-							5,
-							"#fbbf24",
-							15,
-							"#d97706",
-						],
-						"circle-radius": [
-							"step",
-							["get", "point_count"],
-							18,
-							5,
-							22,
-							15,
-							28,
-						],
-						"circle-stroke-color": darkMode ? "#1f2937" : "#ffffff",
-						"circle-stroke-width": 2,
-					}}
-					type="circle"
-				/>
-				{/* Cluster count label */}
-				<Layer
-					filter={["has", "point_count"]}
-					id="taxi-stands-cluster-count"
 					layout={{
+						"icon-image": "taxi-cluster-icon",
+						"icon-size": [
+							"step",
+							["get", "point_count"],
+							0.65,
+							5,
+							0.78,
+							15,
+							0.95,
+						],
+						"icon-allow-overlap": true,
 						"text-field": "{point_count_abbreviated}",
-						"text-size": 12,
+						"text-size": 11,
 						"text-font": ["Open Sans Bold"],
+						"text-offset": [1.15, -1.15],
+						"text-anchor": "center",
+						"text-allow-overlap": true,
 					}}
 					paint={{
-						"text-color": "#78350f",
+						"text-color": "#ffffff",
+						"text-halo-color": "#78350f",
+						"text-halo-width": 1.5,
 					}}
 					type="symbol"
 				/>
@@ -563,150 +712,60 @@ function MapLibreInner({
 				/>
 			</Source>
 
-			{/* Vehicle markers */}
-			{vehicles.map((vehicle) => {
-				const isBus = vehicle.type === "jutc";
-				const accentColor = isBus ? "#10b981" : "#8b5cf6";
-				const rotation = vehicle.heading ?? 0;
-				return (
-					<Marker
-						anchor="center"
-						key={vehicle.id}
-						latitude={vehicle.lat}
-						longitude={vehicle.lng}
-					>
-						<button
-							aria-label={vehicle.name}
-							className="group cursor-pointer border-none bg-transparent p-0 outline-none"
-							onClick={(e) => handleVehicleClick(vehicle, e)}
-							type="button"
-						>
-							<div
-								className="drop-shadow-lg transition-transform duration-150 group-hover:scale-110"
-								style={{ transform: `rotate(${rotation}deg)` }}
-							>
-								{isBus ? (
-									/* Bus silhouette icon */
-									<svg
-										height="44"
-										viewBox="0 0 44 44"
-										width="44"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<title>{vehicle.name}</title>
-										{/* Direction cone */}
-										<polygon
-											fill={accentColor}
-											opacity="0.4"
-											points="22,0 16,12 28,12"
-										/>
-										{/* Body */}
-										<rect
-											fill="#1f2937"
-											height="24"
-											rx="5"
-											width="20"
-											x="12"
-											y="12"
-										/>
-										{/* Windshield */}
-										<rect
-											fill={accentColor}
-											height="6"
-											rx="2"
-											width="14"
-											x="15"
-											y="14"
-										/>
-										{/* Side windows */}
-										<rect
-											fill="#9ca3af"
-											height="3"
-											rx="1"
-											width="4"
-											x="14"
-											y="23"
-										/>
-										<rect
-											fill="#9ca3af"
-											height="3"
-											rx="1"
-											width="4"
-											x="20"
-											y="23"
-										/>
-										<rect
-											fill="#9ca3af"
-											height="3"
-											rx="1"
-											width="4"
-											x="26"
-											y="23"
-										/>
-										{/* Wheels */}
-										<circle cx="15" cy="35" fill="#374151" r="2.5" />
-										<circle cx="29" cy="35" fill="#374151" r="2.5" />
-									</svg>
-								) : (
-									/* Taxi/car silhouette icon */
-									<svg
-										height="44"
-										viewBox="0 0 44 44"
-										width="44"
-										xmlns="http://www.w3.org/2000/svg"
-									>
-										<title>{vehicle.name}</title>
-										{/* Direction cone */}
-										<polygon
-											fill={accentColor}
-											opacity="0.4"
-											points="22,2 17,12 27,12"
-										/>
-										{/* Body */}
-										<rect
-											fill="#1f2937"
-											height="22"
-											rx="6"
-											width="18"
-											x="13"
-											y="12"
-										/>
-										{/* Roof / top accent */}
-										<rect
-											fill={accentColor}
-											height="4"
-											rx="2"
-											width="10"
-											x="17"
-											y="14"
-										/>
-										{/* Windows */}
-										<rect
-											fill="#9ca3af"
-											height="4"
-											rx="1.5"
-											width="5"
-											x="14.5"
-											y="21"
-										/>
-										<rect
-											fill="#9ca3af"
-											height="4"
-											rx="1.5"
-											width="5"
-											x="24.5"
-											y="21"
-										/>
-										{/* Wheels */}
-										<circle cx="16" cy="33" fill="#374151" r="2" />
-										<circle cx="28" cy="33" fill="#374151" r="2" />
-									</svg>
-								)}
-							</div>
-						</button>
-					</Marker>
-				);
-			})}
+			{/* ── Vehicle layer (clustered, zoom-independent size) ── */}
+			<Source
+				cluster
+				clusterMaxZoom={13}
+				clusterRadius={40}
+				data={vehiclesGeoJson}
+				id="vehicles"
+				type="geojson"
+			>
+				{/* Cluster icon badge (bus+taxi split) with count overlaid */}
+				<Layer
+					filter={["has", "point_count"]}
+					id="vehicles-clusters"
+					layout={{
+						"icon-image": "bus-cluster-icon",
+						"icon-size": [
+							"step",
+							["get", "point_count"],
+							0.65,
+							5,
+							0.78,
+							15,
+							0.95,
+						],
+						"icon-allow-overlap": true,
+						"text-field": "{point_count_abbreviated}",
+						"text-size": 11,
+						"text-font": ["Open Sans Bold"],
+						"text-offset": [1.15, -1.15],
+						"text-anchor": "center",
+						"text-allow-overlap": true,
+					}}
+					paint={{
+						"text-color": "#ffffff",
+						"text-halo-color": "#1f2937",
+						"text-halo-width": 1.5,
+					}}
+					type="symbol"
+				/>
+				{/* Individual vehicle icons — fixed pixel size, rotated by heading */}
+				<Layer
+					filter={["!", ["has", "point_count"]]}
+					id="vehicles-point"
+					layout={{
+						"icon-image": ["get", "iconImage"],
+						"icon-size": 0.7,
+						"icon-rotate": ["get", "heading"],
+						"icon-rotation-alignment": "map",
+						"icon-allow-overlap": true,
+						"icon-ignore-placement": true,
+					}}
+					type="symbol"
+				/>
+			</Source>
 
 			{/* From marker (green pin) */}
 			{fromMarker && (
