@@ -1,9 +1,9 @@
 export interface TaxiStandData {
-	address: string;
-	id: string;
-	lat: number;
-	lng: number;
-	name: string;
+  address: string;
+  id: string;
+  lat: number;
+  lng: number;
+  name: string;
 }
 
 /**

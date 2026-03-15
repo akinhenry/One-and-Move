@@ -251,7 +251,6 @@ function MapLibreInner({
 
 	return (
 		<Map
-			ref={mapRef}
 			initialViewState={{
 				longitude: DEFAULT_CENTER.lng,
 				latitude: DEFAULT_CENTER.lat,
@@ -280,6 +279,7 @@ function MapLibreInner({
 				],
 			}}
 			onClick={() => setSelectedVehicle(null)}
+			ref={mapRef}
 			style={{ width: "100%", height: "100%" }}
 		>
 			<NavigationControl position="bottom-right" />
