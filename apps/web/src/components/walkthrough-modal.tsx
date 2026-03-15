@@ -71,10 +71,10 @@ export default function WalkthroughModal() {
 
 	return (
 		<div
+			aria-label="Welcome walkthrough"
+			aria-modal="true"
 			className="fixed inset-0 z-2000 flex items-center justify-center bg-black/50 backdrop-blur-sm"
 			role="dialog"
-			aria-modal="true"
-			aria-label="Welcome walkthrough"
 		>
 			<div className="relative mx-4 w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-neutral-900">
 				{/* Close */}
@@ -91,12 +91,12 @@ export default function WalkthroughModal() {
 				<div className="flex justify-center gap-2 pt-6">
 					{Array.from({ length: TOTAL_STEPS }, (_, i) => (
 						<div
-							key={i}
 							className={`h-2 rounded-full transition-all duration-300 ${
 								i === step
 									? "w-6 bg-blue-500"
 									: "w-2 bg-gray-200 dark:bg-neutral-700"
 							}`}
+							key={i}
 						/>
 					))}
 				</div>
@@ -189,68 +189,68 @@ function StepLegend() {
 			<div className="w-full space-y-3">
 				{/* Bus */}
 				<LegendRow
+					description="Green icons represent JUTC public buses moving along their routes."
 					icon={
 						<div className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500">
 							<Bus color="white" size={18} />
 						</div>
 					}
 					title="JUTC Bus"
-					description="Green icons represent JUTC public buses moving along their routes."
 				/>
 
 				{/* Taxi */}
 				<LegendRow
+					description="White sedan icons show private taxis. Grey badges indicate taxi clusters."
 					icon={
 						<div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-500">
 							<Car color="white" size={18} />
 						</div>
 					}
 					title="Private Taxi"
-					description="White sedan icons show private taxis. Grey badges indicate taxi clusters."
 				/>
 
 				{/* Bus stop */}
 				<LegendRow
+					description="Green dots mark official JUTC bus stops."
 					icon={
 						<div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30">
 							<div className="h-3 w-3 rounded-full bg-emerald-500" />
 						</div>
 					}
 					title="Bus Stop"
-					description="Green dots mark official JUTC bus stops."
 				/>
 
 				{/* Taxi stand */}
 				<LegendRow
+					description="Amber dots mark known taxi pickup locations."
 					icon={
 						<div className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-amber-500 bg-amber-50 dark:bg-amber-900/30">
 							<div className="h-3 w-3 rounded-full bg-amber-500" />
 						</div>
 					}
 					title="Taxi Stand"
-					description="Amber dots mark known taxi pickup locations."
 				/>
 
 				{/* Clusters */}
 				<LegendRow
+					description="When zoomed out, nearby vehicles group into numbered badges. Zoom in to see them individually."
 					icon={
 						<div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-600">
 							<span className="font-bold text-xs text-white">5+</span>
 						</div>
 					}
 					title="Clusters"
-					description="When zoomed out, nearby vehicles group into numbered badges. Zoom in to see them individually."
 				/>
 
 				{/* Route line */}
 				<LegendRow
+					description="The blue line shows your planned trip route between two locations."
 					icon={
 						<div className="flex h-9 w-9 items-center justify-center">
 							<div className="h-1 w-7 rounded-full bg-blue-500" />
 						</div>
 					}
 					title="Route Line"
-					description="The blue line shows your planned trip route between two locations."
 				/>
 			</div>
 		</div>

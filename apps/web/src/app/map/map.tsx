@@ -1,7 +1,8 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import WebMap from "@/components/Map";
 import { MapNavBar } from "@/components/map-nav-bar";
 import type {
@@ -15,11 +16,45 @@ import WalkthroughModal from "@/components/walkthrough-modal";
 export default function TransitMap() {
 	const { resolvedTheme } = useTheme();
 	const isDark = resolvedTheme === "dark";
+	const searchParams = useSearchParams();
 
-	const [fromMarker, setFromMarker] = useState<LatLng | null>(null);
-	const [toMarker, setToMarker] = useState<LatLng | null>(null);
+	// Pre-populate from hero search params
+	const initialFrom = useMemo<LocationSuggestion | null>(() => {
+		const name = searchParams.get("fromName");
+		const lat = searchParams.get("fromLat");
+		const lng = searchParams.get("fromLng");
+		if (!name || !lat || !lng) return null;
+		return {
+			id: `hero-from`,
+			name,
+			address: name,
+			coords: { lat: Number(lat), lng: Number(lng) },
+		};
+	}, [searchParams]);
+
+	const initialTo = useMemo<LocationSuggestion | null>(() => {
+		const name = searchParams.get("toName");
+		const lat = searchParams.get("toLat");
+		const lng = searchParams.get("toLng");
+		if (!name || !lat || !lng) return null;
+		return {
+			id: `hero-to`,
+			name,
+			address: name,
+			coords: { lat: Number(lat), lng: Number(lng) },
+		};
+	}, [searchParams]);
+
+	const [fromMarker, setFromMarker] = useState<LatLng | null>(
+		initialFrom?.coords ?? null
+	);
+	const [toMarker, setToMarker] = useState<LatLng | null>(
+		initialTo?.coords ?? null
+	);
 	const [routePoints, setRoutePoints] = useState<LatLng[]>([]);
-	const [flyTo, setFlyTo] = useState<LatLng | null>(null);
+	const [flyTo, setFlyTo] = useState<LatLng | null>(
+		initialFrom?.coords ?? initialTo?.coords ?? null
+	);
 
 	const handleFromSelect = useCallback((loc: LocationSuggestion | null) => {
 		setFromMarker(loc ? loc.coords : null);
@@ -55,6 +90,8 @@ export default function TransitMap() {
 				toMarker={toMarker}
 			/>
 			<TripDrawer
+				initialFrom={initialFrom}
+				initialTo={initialTo}
 				onFromSelect={handleFromSelect}
 				onRouteFound={handleRouteFound}
 				onToSelect={handleToSelect}

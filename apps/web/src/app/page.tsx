@@ -3,6 +3,7 @@
 import { ArrowRight, Car, Clock, Map as MapIcon } from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
+import HeroRouteSearch from "@/components/hero-route-search";
 import WebMap from "@/components/Map";
 import Navigation from "@/components/navigation";
 
@@ -80,33 +81,7 @@ export default function Home() {
 					</div>
 
 					{/* Interactive Route Menu Strip */}
-					<div className="w-full max-w-md rounded-2xl border border-blue-200 bg-white p-6 shadow-xl transition-colors duration-500 dark:border-slate-800 dark:bg-[#111827]">
-						<div className="mb-4">
-							<label className="mb-1.5 block font-bold text-blue-900 text-sm dark:text-slate-200">
-								From
-							</label>
-							<input
-								className="w-full rounded-lg border border-slate-300 bg-zinc-50 px-4 py-2.5 text-blue-900 placeholder-blue-300 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-								defaultValue="Mona Campus"
-							/>
-						</div>
-						<div className="mb-4">
-							<label className="mb-1.5 block font-bold text-blue-900 text-sm dark:text-slate-200">
-								To
-							</label>
-							<input
-								className="w-full rounded-lg border border-slate-300 bg-zinc-50 px-4 py-2.5 text-blue-900 placeholder-blue-300 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600 dark:border-slate-700 dark:bg-[#0B1120] dark:text-slate-100 dark:placeholder-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-								defaultValue="Downtown Kingston"
-							/>
-						</div>
-
-						<button
-							className="mt-2 mb-2 w-full rounded-xl bg-blue-600 py-3.5 font-bold text-white shadow-md transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 dark:bg-blue-500 dark:focus:ring-offset-[#111827] dark:hover:bg-blue-400"
-							type="button"
-						>
-							Show me the best route
-						</button>
-					</div>
+					<HeroRouteSearch />
 				</div>
 			</main>
 
