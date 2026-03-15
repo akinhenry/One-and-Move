@@ -29,7 +29,7 @@ function SuggestionList({
 		queryFn: () => client.geocode.search({ query: debounced }),
 		enabled: visible && debounced.trim().length >= 2,
 		staleTime: 60_000,
-		placeholderData: (prev) => prev,
+		placeholderData: (prev: LocationSuggestion[] | undefined) => prev,
 	});
 
 	if (!visible || query.trim().length < 2) return null;
@@ -79,7 +79,15 @@ function SuggestionList({
 
 /* ── Main widget ──────────────────────────────────── */
 
-export default function HeroRouteSearch() {
+interface HeroRouteSearchProps {
+	onFromSelect?: (location: LocationSuggestion) => void;
+	onToSelect?: (location: LocationSuggestion) => void;
+}
+
+export default function HeroRouteSearch({
+	onFromSelect,
+	onToSelect,
+}: HeroRouteSearchProps = {}) {
 	const router = useRouter();
 
 	const [fromQuery, setFromQuery] = useState("");
@@ -112,12 +120,14 @@ export default function HeroRouteSearch() {
 		setSelectedFrom(s);
 		setFromQuery(s.name);
 		setShowFromSuggestions(false);
+		onFromSelect?.(s);
 	};
 
 	const handleToSelect = (s: LocationSuggestion) => {
 		setSelectedTo(s);
 		setToQuery(s.name);
 		setShowToSuggestions(false);
+		onToSelect?.(s);
 	};
 
 	const handleSubmit = () => {
