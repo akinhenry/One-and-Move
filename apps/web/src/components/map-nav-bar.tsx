@@ -11,8 +11,8 @@ import {
 	DropdownMenuTrigger,
 } from "@One-and-Move/ui/components/dropdown-menu";
 import { ArrowLeft, LogOut, Moon, Sun, User } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { authClient } from "@/lib/auth-client";
 
 export function MapNavBar() {

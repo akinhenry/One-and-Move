@@ -280,7 +280,7 @@ const POPULAR_TAXI_ROUTES = [
 /* ─── Simulation state factory ──────────────────── */
 
 export const DEFAULT_CONFIG: SimulationConfig = {
-  globalSpeed: 0.15,
+  globalSpeed: 0.1,
   randomness: 0.15,
   latenessChance: 0.3,
   latenessSpeedFactor: 0.4,

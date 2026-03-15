@@ -173,12 +173,17 @@ function SuggestionList({
 					}}
 					type="button"
 				>
-					<MapPin className="mt-0.5 shrink-0 text-gray-400 dark:text-neutral-500" size={14} />
+					<MapPin
+						className="mt-0.5 shrink-0 text-gray-400 dark:text-neutral-500"
+						size={14}
+					/>
 					<div className="min-w-0">
 						<p className="truncate font-medium text-gray-900 text-sm dark:text-neutral-100">
 							{s.name}
 						</p>
-						<p className="truncate text-gray-500 text-xs dark:text-neutral-400">{s.address}</p>
+						<p className="truncate text-gray-500 text-xs dark:text-neutral-400">
+							{s.address}
+						</p>
 					</div>
 				</button>
 			))}
@@ -299,13 +304,19 @@ function RouteResultsPanel({
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-4">
 						<div className="flex items-center gap-1.5">
-							<Clock className="text-gray-400 dark:text-neutral-500" size={14} />
+							<Clock
+								className="text-gray-400 dark:text-neutral-500"
+								size={14}
+							/>
 							<span className="font-semibold text-gray-900 text-sm dark:text-neutral-100">
 								{route.totalDuration} min
 							</span>
 						</div>
 						<div className="flex items-center gap-1.5">
-							<DollarSign className="text-gray-400 dark:text-neutral-500" size={14} />
+							<DollarSign
+								className="text-gray-400 dark:text-neutral-500"
+								size={14}
+							/>
 							<span className="font-semibold text-gray-900 text-sm dark:text-neutral-100">
 								JMD ${route.totalCost.toLocaleString()}
 							</span>
@@ -644,7 +655,10 @@ export default function TripDrawer({
 							? "bg-transparent"
 							: "bg-black/20 dark:bg-black/40"
 					}`}
-					style={{ zIndex: 1010, pointerEvents: view === "tracking" ? "none" : "auto" }}
+					style={{
+						zIndex: 1010,
+						pointerEvents: view === "tracking" ? "none" : "auto",
+					}}
 				/>
 
 				<Drawer.Content
@@ -689,7 +703,9 @@ export default function TripDrawer({
 													{selectedFrom?.name ?? "Starting location"}
 												</p>
 											</div>
-											<span className="shrink-0 text-gray-300 dark:text-neutral-600">→</span>
+											<span className="shrink-0 text-gray-300 dark:text-neutral-600">
+												→
+											</span>
 											<div className="flex items-center gap-1.5 min-w-0 flex-1">
 												<div className="h-2 w-2 shrink-0 rounded-full bg-red-500" />
 												<p className="truncate text-sm text-gray-700 dark:text-neutral-300">
@@ -858,7 +874,9 @@ export default function TripDrawer({
 										{/* Divider */}
 										<div className="flex items-center gap-3 pt-1">
 											<div className="h-px flex-1 bg-gray-200 dark:bg-neutral-700" />
-											<span className="text-xs text-gray-400 dark:text-neutral-500">or</span>
+											<span className="text-xs text-gray-400 dark:text-neutral-500">
+												or
+											</span>
 											<div className="h-px flex-1 bg-gray-200 dark:bg-neutral-700" />
 										</div>
 
@@ -903,7 +921,9 @@ export default function TripDrawer({
 									<ArrowLeft size={18} />
 								</button>
 								<div className="min-w-0 flex-1">
-									<h2 className="font-semibold text-gray-900 dark:text-neutral-100">Board Vehicle</h2>
+									<h2 className="font-semibold text-gray-900 dark:text-neutral-100">
+										Board Vehicle
+									</h2>
 									<p className="text-xs text-gray-500 dark:text-neutral-400">
 										Track your ride to help others
 									</p>

@@ -6,13 +6,13 @@ import { Bus, Car, Navigation } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+	createSimulatedUser,
+	createSimulatedVehicles,
 	DEFAULT_CONFIG,
+	resolveRoadPaths,
 	type SimulatedUser,
 	type SimulatedVehicle,
 	type SimulationConfig,
-	createSimulatedUser,
-	createSimulatedVehicles,
-	resolveRoadPaths,
 	tickUser,
 	tickVehicles,
 } from "@/lib/simulation";
@@ -867,11 +867,11 @@ export default function WebMap({
 	darkMode = false,
 }: WebMapProps) {
 	// ── Simulation state ──────────────────────────────
-	const [simVehicles, setSimVehicles] = useState<SimulatedVehicle[]>(
-		() => createSimulatedVehicles()
+	const [simVehicles, setSimVehicles] = useState<SimulatedVehicle[]>(() =>
+		createSimulatedVehicles()
 	);
-	const [simUser, setSimUser] = useState<SimulatedUser>(
-		() => createSimulatedUser()
+	const [simUser, setSimUser] = useState<SimulatedUser>(() =>
+		createSimulatedUser()
 	);
 	const [simConfig] = useState<SimulationConfig>(() => DEFAULT_CONFIG);
 	const lastTickRef = useRef<number>(Date.now());
@@ -882,9 +882,11 @@ export default function WebMap({
 		resolveRoadPaths(simVehicles).then((snapped) => {
 			if (!cancelled) setSimVehicles([...snapped]);
 		});
-		return () => { cancelled = true; };
-	// Run once on mount only
-	// biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only
+		return () => {
+			cancelled = true;
+		};
+		// Run once on mount only
+		// biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only
 	}, []);
 
 	// Tick loop — runs entirely in-browser, no separate process needed
