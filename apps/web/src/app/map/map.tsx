@@ -10,6 +10,7 @@ import type {
 	TripRoute,
 } from "@/components/TripDrawer";
 import TripDrawer from "@/components/TripDrawer";
+import WalkthroughModal from "@/components/walkthrough-modal";
 
 export default function TransitMap() {
 	const { resolvedTheme } = useTheme();
@@ -58,6 +59,7 @@ export default function TransitMap() {
 				onRouteFound={handleRouteFound}
 				onToSelect={handleToSelect}
 			/>
+			<WalkthroughModal />
 		</div>
 	);
 }
