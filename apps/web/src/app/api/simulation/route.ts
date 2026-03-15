@@ -1,4 +1,4 @@
-import type { SimulatedUser, SimulatedVehicle } from "@/lib/simulation";
+import type { LatLng, SimulatedUser, SimulatedVehicle } from "@/lib/simulation";
 import {
   applyResolvedPaths,
   createSimulatedUser,
@@ -8,7 +8,6 @@ import {
   tickUser,
   tickVehicles,
 } from "@/lib/simulation";
-import type { LatLng } from "@/lib/simulation";
 
 /* ─── Singleton simulation state ────────────────── */
 
@@ -130,7 +129,11 @@ export async function GET(): Promise<Response> {
         if (closed) return;
         closed = true;
         clearInterval(id);
-        try { controller.close(); } catch { /* already closed */ }
+        try {
+          controller.close();
+        } catch {
+          /* already closed */
+        }
       };
 
       // Send first frame immediately
@@ -140,7 +143,10 @@ export async function GET(): Promise<Response> {
 
       // Tick + push every second
       const id = setInterval(() => {
-        if (closed) { clearInterval(id); return; }
+        if (closed) {
+          clearInterval(id);
+          return;
+        }
         try {
           tick();
           const frame = buildFrame();
