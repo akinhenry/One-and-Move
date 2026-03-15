@@ -1,6 +1,7 @@
 import { auth } from "@One-and-Move/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 import TransitMap from "./map";
 
@@ -15,7 +16,9 @@ export default async function MapPage() {
 
 	return (
 		<div className="fixed inset-0 overflow-hidden">
-			<TransitMap />
+			<Suspense>
+				<TransitMap />
+			</Suspense>
 		</div>
 	);
 }

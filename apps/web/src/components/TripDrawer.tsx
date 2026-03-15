@@ -53,6 +53,8 @@ export interface TripRoute {
 }
 
 interface TripDrawerProps {
+	initialFrom?: LocationSuggestion | null;
+	initialTo?: LocationSuggestion | null;
 	onFromSelect?: (location: LocationSuggestion | null) => void;
 	onRouteFound?: (route: TripRoute | null) => void;
 	onToSelect?: (location: LocationSuggestion | null) => void;
@@ -354,6 +356,8 @@ function getSlideClass(
 }
 
 export default function TripDrawer({
+	initialFrom,
+	initialTo,
 	onFromSelect,
 	onToSelect,
 	onRouteFound,
@@ -365,12 +369,12 @@ export default function TripDrawer({
 	);
 
 	// Search state
-	const [fromQuery, setFromQuery] = useState("");
-	const [toQuery, setToQuery] = useState("");
+	const [fromQuery, setFromQuery] = useState(initialFrom?.name ?? "");
+	const [toQuery, setToQuery] = useState(initialTo?.name ?? "");
 	const [selectedFrom, setSelectedFrom] = useState<LocationSuggestion | null>(
-		null
+		initialFrom ?? null
 	);
-	const [selectedTo, setSelectedTo] = useState<LocationSuggestion | null>(null);
+	const [selectedTo, setSelectedTo] = useState<LocationSuggestion | null>(initialTo ?? null);
 	const [showFromSuggestions, setShowFromSuggestions] = useState(false);
 	const [showToSuggestions, setShowToSuggestions] = useState(false);
 	const [isSearching, setIsSearching] = useState(false);
