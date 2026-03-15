@@ -31,7 +31,9 @@ export default function LoginPage() {
 				<div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg">
 					<Suspense
 						fallback={
-							<div className="text-center text-muted-foreground">Loading...</div>
+							<div className="text-center text-muted-foreground">
+								Loading...
+							</div>
 						}
 					>
 						<AuthForms />

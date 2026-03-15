@@ -462,17 +462,14 @@ export default function TripDrawer({
 	/* ── Allow closing drawer for all views ── */
 	const canClose = true;
 
-	const handleOpenChange = useCallback(
-		(nextOpen: boolean) => {
-			if (nextOpen) {
-				setOpen(true);
-			} else {
-				// Just close without clearing state
-				setOpen(false);
-			}
-		},
-		[]
-	);
+	const handleOpenChange = useCallback((nextOpen: boolean) => {
+		if (nextOpen) {
+			setOpen(true);
+		} else {
+			// Just close without clearing state
+			setOpen(false);
+		}
+	}, []);
 
 	/* ── Trigger button (always rendered) ──────── */
 	const triggerButton = (
@@ -502,45 +499,46 @@ export default function TripDrawer({
 	);
 
 	/* ── Active trip pill with stop button (when navigating) ── */
-	const activeTripPill = activeTrip && route ? (
-		<div
-			className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-2xl border border-green-400/60 bg-green-500 px-4 py-2.5 shadow-xl backdrop-blur-xl"
-			style={{ zIndex: 1002 }}
-		>
-			<DrawerTrigger asChild>
+	const activeTripPill =
+		activeTrip && route ? (
+			<div
+				className="absolute bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-2xl border border-green-400/60 bg-green-500 px-4 py-2.5 shadow-xl backdrop-blur-xl"
+				style={{ zIndex: 1002 }}
+			>
+				<DrawerTrigger asChild>
+					<button
+						aria-label="View active trip details"
+						className="flex items-center gap-2 text-white transition-opacity hover:opacity-90"
+						type="button"
+					>
+						<div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/25">
+							<Navigation color="white" size={11} />
+						</div>
+						<div className="flex flex-col items-start gap-0.5">
+							<span className="text-xs font-semibold leading-none">
+								{activeTrip.legs[activeTrip.currentLegIndex]?.to ?? "Next stop"}
+							</span>
+							<span className="text-[10px] leading-none text-white/80">
+								Leg {activeTrip.currentLegIndex + 1}/{activeTrip.legs.length}
+							</span>
+						</div>
+					</button>
+				</DrawerTrigger>
+				<div className="mx-1 h-4 w-px bg-white/30" />
 				<button
-					aria-label="View active trip details"
-					className="flex items-center gap-2 text-white transition-opacity hover:opacity-90"
+					aria-label="Stop trip"
+					className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/30"
+					onClick={(e) => {
+						e.stopPropagation();
+						handleCancelTripNav();
+					}}
 					type="button"
 				>
-					<div className="flex h-6 w-6 items-center justify-center rounded-full bg-white/25">
-						<Navigation color="white" size={11} />
-					</div>
-					<div className="flex flex-col items-start gap-0.5">
-						<span className="text-xs font-semibold leading-none">
-							{activeTrip.legs[activeTrip.currentLegIndex]?.to ?? "Next stop"}
-						</span>
-						<span className="text-[10px] leading-none text-white/80">
-							Leg {activeTrip.currentLegIndex + 1}/{activeTrip.legs.length}
-						</span>
-					</div>
+					<CircleStop size={12} />
+					Stop
 				</button>
-			</DrawerTrigger>
-			<div className="mx-1 h-4 w-px bg-white/30" />
-			<button
-				aria-label="Stop trip"
-				className="flex items-center gap-1.5 rounded-lg bg-white/20 px-2.5 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-white/30"
-				onClick={(e) => {
-					e.stopPropagation();
-					handleCancelTripNav();
-				}}
-				type="button"
-			>
-				<CircleStop size={12} />
-				Stop
-			</button>
-		</div>
-	) : null;
+			</div>
+		) : null;
 
 	/* ── Tracking pill (when broadcasting location) ── */
 	const trackingPill = (
