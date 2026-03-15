@@ -1,6 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "DATABASE_URL",
+    "BETTER_AUTH_SECRET",
+    "BETTER_AUTH_URL",
+    "CORS_ORIGIN",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "APPLE_CLIENT_ID",
+    "APPLE_CLIENT_SECRET",
+    "FACEBOOK_CLIENT_ID",
+    "FACEBOOK_CLIENT_SECRET",
+    "LOCATION_IQ_TOKEN",
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
