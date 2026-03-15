@@ -14,14 +14,14 @@
     "@One-and-Move/auth": "workspace:*",
     "@One-and-Move/db": "workspace:*",
     "@One-and-Move/env": "workspace:*",
-    "@orpc/client": "catalog:",
-    "@orpc/openapi": "catalog:",
-    "@orpc/server": "catalog:",
-    "@orpc/zod": "catalog:",
-    "dotenv": "catalog:",
+    "@orpc/client": "^1.12.2",
+    "@orpc/openapi": "^1.12.2",
+    "@orpc/server": "^1.12.2",
+    "@orpc/zod": "^1.12.2",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.45.1",
-    "next": "catalog:",
-    "zod": "catalog:"
+    "next": "^16.1.1",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@One-and-Move/config": "workspace:*",

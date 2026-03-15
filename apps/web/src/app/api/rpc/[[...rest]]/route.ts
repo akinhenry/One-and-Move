@@ -14,6 +14,7 @@ const rpcHandler = new RPCHandler(appRouter, {
     }),
   ],
 });
+
 const apiHandler = new OpenAPIHandler(appRouter, {
   plugins: [
     new OpenAPIReferencePlugin({

@@ -17,7 +17,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
   const handleGoogleSignIn = async () => {
     const { error } = await authClient.signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: "/map",
     });
 
     if (error) {
@@ -40,7 +40,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         },
         {
           onSuccess: () => {
-            router.push("/dashboard");
+            router.push("/map");
             toast.success("Sign up successful");
           },
           onError: (error) => {

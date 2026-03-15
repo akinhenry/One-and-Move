@@ -18,9 +18,9 @@
   "dependencies": {
     "@One-and-Move/env": "workspace:*",
     "@neondatabase/serverless": "^1.0.2",
-    "dotenv": "catalog:",
+    "dotenv": "^16.4.5",
     "drizzle-orm": "^0.45.1",
-    "zod": "catalog:"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@One-and-Move/config": "workspace:*",
